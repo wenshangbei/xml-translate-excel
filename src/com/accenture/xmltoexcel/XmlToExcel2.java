@@ -16,6 +16,7 @@ import java.util.Map;
 
 import javax.activation.UnsupportedDataTypeException;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -37,7 +38,7 @@ public class XmlToExcel2 {
 
 	public static void main(String[] args) {
 
-		String xmlPath = "d:/EDI810(HK)-MTL(1224H Stevedoring) MSC 20170629.xml";
+		String xmlPath = "D:/workspace/EDI810(HK)-MTL(1224H Stevedoring) MSC 20170629.xml";
 		// writeExcel( xmlPath);
 	/*	Map<String, List<List<String>>> analysisXml = analysisXml(xmlPath);
 		System.out.println(analysisXml);*/
@@ -97,7 +98,9 @@ public class XmlToExcel2 {
 
 	public static void udateExecl(Map xml) {
 		try {
-			File file = new File("D:/MSC_1224H.xls");
+			xml = (LinkedHashMap<String, List<List<String>>>) xml;
+			System.out.println(xml);
+			File file = new File("D:\\workspace\\MSC_1224H.xls");
 			// 传入的文件
 			FileInputStream fileInput = new FileInputStream(file);
 			// poi包下的类读取excel文件
@@ -108,11 +111,37 @@ public class XmlToExcel2 {
 			int numberOfSheets = workbook.getNumberOfSheets();
 			
 			System.out.println(numberOfSheets);
+			
+			for(int i = 0; i < numberOfSheets; i++) {
+				
+				HSSFSheet sheet = workbook.getSheetAt(i);
+				if (sheet != null) {
+					List<List<String>> rows = (List<List<String>>) xml.get(sheet.getSheetName());
+					int rowN = 1;
+					for (List<String> row : rows) {
+						int cellN = 0;
+						HSSFRow rowSheet = sheet.getRow(rowN);
+						if (rowSheet == null) {
+							rowSheet = sheet.createRow(rowN);
+						}
+						rowN ++;
+						for (String cell : row) {
+							HSSFCell cellSheet =  rowSheet.getCell(cellN);
+							if(cellSheet == null){
+								cellSheet = rowSheet.createCell(cellN);
+							}
+							cellSheet.setCellValue(cell);
+							cellN ++;
+						}
+					}
+				}
+				
+			}
 		
 			
 			
 		
-			FileOutputStream os = new FileOutputStream("D:\\MSC_1224H.xls");
+			FileOutputStream os = new FileOutputStream("D:\\workspace\\updeData\\MSC_1224H.xls");
 			os.flush();
 			// 将Excel写出
 			workbook.write(os);
